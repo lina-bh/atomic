@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 
 RELEASE="$(rpm -E %fedora)"
 
-find .
+find . || :
 
 # https://github.com/ublue-os/bluefin/blob/f833e1f6a5d1863b26e6f24a5ec28068d511b3de/build_files/shared/build-base.sh
 # Copy Files to Container
