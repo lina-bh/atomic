@@ -8,7 +8,7 @@ RELEASE="$(rpm -E %fedora)"
 # https://github.com/ublue-os/bluefin/blob/f833e1f6a5d1863b26e6f24a5ec28068d511b3de/build_files/shared/build-base.sh
 
 # Copy Files to Container
-cp -rv /bluefin/just /tmp/just
+cp -rv bluefin/just /tmp/just
 cp -v bluefin/system_files/shared/etc/yum.repos.d/tailscale.repo /etc/yum.repos.d
 cp -rv bluefin/system_files/shared/usr/share/fonts/inter /usr/share/fonts
 mkdir -p /usr/share/just
