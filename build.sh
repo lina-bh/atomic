@@ -12,8 +12,8 @@ find .
 cp -rv bluefin/just /tmp/just
 cp -v bluefin/system_files/shared/etc/yum.repos.d/tailscale.repo /etc/yum.repos.d
 cp -rv bluefin/system_files/shared/usr/share/fonts/inter /usr/share/fonts
-mkdir -p /usr/share/just
-cp -v bluefin/system_files/shared/usr/share/just/* /usr/share/just
+# mkdir -p /usr/share/just
+# cp -v bluefin/system_files/shared/usr/share/just/* /usr/share/just
 cp -v bluefin/system_files/dx/usr/lib/systemd/system/*.service /usr/lib/systemd/system
 cp -v bluefin/system_files/dx/usr/lib/systemd/tmpfiles.d/*.conf /usr/lib/systemd/tmpfiles.d
 cp -v bluefin/system_files/dx/etc/yum.repos.d/vscode.repo /etc/yum.repos.d
@@ -68,20 +68,4 @@ systemctl disable pmie
 systemctl disable pmlogger
 
 ./bluefin/build_files/base/18-workarounds.sh
-
-### Install packages
-
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
-
-# this installs a package from fedora repos
-rpm-ostree install chromium
-
-# this would install a package from rpmfusion
-# rpm-ostree install vlc
-
-#### Example for enabling a System Unit File
-
-systemctl enable podman.socket
+./bluefin/build_files/base/19-initramfs.sh
