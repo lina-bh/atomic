@@ -11,7 +11,6 @@ COPY 1password.repo /etc/yum.repos.d
 COPY 1password.desktop /etc/skel/.config/autostart
 COPY op-quick-access.desktop /usr/share/applications
 COPY op-quick-access.desktop /usr/share/kglobalaccel
-ENV RPMOSTREE_CLIWRAP_SKIP=1
 RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     --mount=type=bind,from=kernel,source=/tmp/rpms,target=/tmp/rpms \
     rm -v /etc/yum.repos.d/hikariknight-looking-glass-kvmfr-fedora-41.repo && \
