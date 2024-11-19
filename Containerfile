@@ -11,10 +11,12 @@ COPY 1password.repo /etc/yum.repos.d
 COPY 1password.desktop /etc/skel/.config/autostart
 COPY op-quick-access.desktop /usr/share/applications
 COPY op-quick-access.desktop /usr/share/kglobalaccel
+ENV RPMOSTREE_CLIWRAP_SKIP=1
 RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     --mount=type=bind,from=kernel,source=/tmp/rpms,target=/tmp/rpms \
     rm -v /etc/yum.repos.d/hikariknight-looking-glass-kvmfr-fedora-41.repo && \
     rpm --import https://downloads.1password.com/linux/keys/1password.asc && \
+    rpm --import https://dl.google.com/linux/linux_signing_key.pub && \
     sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/google-chrome.repo && \ 
     mkdir -p /var/lib/alternatives /var/opt && \
     rpm-ostree override remove -C \
