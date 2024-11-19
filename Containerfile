@@ -67,7 +67,7 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     nvidia-gpu-firmware \
     && rm -v /etc/yum.repos.d/1password.repo /etc/yum.repos.d/google-chrome.repo \
     && mv /var/opt/1Password /usr/lib/opt/ \
-    && ln -sv /usr/lib/opt/1Password /var/opt/1Password \
+    && echo 'L /opt/1Password - - - - /usr/lib/opt/1Password' >/usr/lib/tmpfiles.d/opt-1password.conf \
     && rm -v /usr/lib/sysusers.d/*onepassword* \
     && echo "g onepassword ${onepassword_gid}" > /usr/lib/sysusers.d/onepassword.conf \
     && chgrp ${onepassword_gid} /usr/lib/opt/1Password/1Password-BrowserSupport \
@@ -77,7 +77,7 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     && chmod 2755 /usr/bin/op \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' /usr/share/applications/org.kde.konsole.desktop \
     && mv /var/opt/google /usr/lib/opt/ \
-    && ln -sv /usr/lib/opt/google /var/opt/google \
+    && echo 'L /opt/google - - - - /usr/lib/opt/google' >/usr/lib/tmpfiles.d/opt-google.conf \
     && ostree container commit
 
 # https://github.com/DeterminateSystems/nix-installer/issues/1297
