@@ -1,15 +1,21 @@
-FROM ghcr.io/ublue-os/bazzite-kernel:41 AS kernel
-FROM ghcr.io/ublue-os/aurora-dx:41
+ARG FED=41
 
-ARG onepassword_gid=111
-ARG onepassword_cli_gid=112
+FROM ghcr.io/ublue-os/bazzite-kernel:${FED} AS kernel
+FROM ghcr.io/ublue-os/aurora-dx:${FED}
+
+ARG onepassword_gid=59999
+ARG onepassword_cli_gid=59998
 
 # https://github.com/blue-build/modules/blob/c0943c009d578214d8bd3d6f185a106420dc034e/modules/bling/installers/1password.sh
 COPY 1password.repo /etc/yum.repos.d
+COPY 1password.desktop /etc/skel/.config/autostart
+COPY op-quick-access.desktop /usr/share/applications
+COPY op-quick-access.desktop /usr/share/kglobalaccel
 RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     --mount=type=bind,from=kernel,source=/tmp/rpms,target=/tmp/rpms \
     rm -v /etc/yum.repos.d/hikariknight-looking-glass-kvmfr-fedora-41.repo && \
     rpm --import https://downloads.1password.com/linux/keys/1password.asc && \
+    sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/google-chrome.repo && \ 
     mkdir -p /var/lib/alternatives /var/opt && \
     rpm-ostree override remove -C \
     xpadneo-kmod-common \
@@ -28,6 +34,7 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     kmod-kvmfr \
     && rpm-ostree override replace -C --experimental /tmp/rpms/*.rpm \
     && rpm-ostree install \
+    google-chrome-stable \
     chromium \
     konsole \
     gnome-disk-utility \
@@ -44,9 +51,6 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     kde-partitionmanager \
     kcharselect \
     kfind \
-    docker-ce-rootless-extras \
-    docker-ce \
-    docker-ce-cli \
     gum \
     glow \
     incus \
@@ -60,16 +64,17 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     fish \
     bpftop \
     nvidia-gpu-firmware \
-    && rm -v /etc/yum.repos.d/1password.repo \
+    && rm -v /etc/yum.repos.d/1password.repo /etc/yum.repos.d/google-chrome.repo \
     && mv /var/opt/1Password /usr/lib/opt/ \
     && ln -sv /usr/lib/opt/1Password /var/opt/1Password \
     && rm -v /usr/lib/sysusers.d/*onepassword* \
     && echo "g onepassword ${onepassword_gid}" > /usr/lib/sysusers.d/onepassword.conf \
     && chgrp ${onepassword_gid} /usr/lib/opt/1Password/1Password-BrowserSupport \
     && chmod 2755 /usr/lib/opt/1Password/1Password-BrowserSupport \
-    && echo 'g onepassword-cli ${onepassword_cli_gid}' > /usr/lib/sysusers.d/onepassword-cli.conf \
+    && echo "g onepassword-cli ${onepassword_cli_gid}" > /usr/lib/sysusers.d/onepassword-cli.conf \
     && chgrp ${onepassword_cli_gid} /usr/bin/op \
     && chmod 2755 /usr/bin/op \
+    && sed -i 's/NoDisplay=true/NoDisplay=false/' /usr/share/applications/org.kde.konsole.desktop \
     && ostree container commit
 
 # https://github.com/DeterminateSystems/nix-installer/issues/1297
