@@ -76,6 +76,8 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     && chgrp ${onepassword_cli_gid} /usr/bin/op \
     && chmod 2755 /usr/bin/op \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' /usr/share/applications/org.kde.konsole.desktop \
+    && mv /var/opt/google /usr/lib/opt/ \
+    && ln -sv /usr/lib/opt/google /var/opt/google \
     && ostree container commit
 
 # https://github.com/DeterminateSystems/nix-installer/issues/1297
