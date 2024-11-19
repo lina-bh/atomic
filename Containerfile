@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     --mount=type=bind,from=kernel,source=/tmp/rpms,target=/tmp/rpms \
     rm -v /etc/yum.repos.d/hikariknight-looking-glass-kvmfr-fedora-41.repo && \
     rpm --import https://downloads.1password.com/linux/keys/1password.asc && \
-    mkdir /var/lib/alternatives /var/opt && \
+    mkdir -p /var/lib/alternatives /var/opt && \
     rpm-ostree override remove -C \
     xpadneo-kmod-common \
     kmod-xpadneo \
