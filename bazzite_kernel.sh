@@ -1,5 +1,6 @@
 #!/bin/bash
 set -xeuo pipefail
+sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/ublue-os-staging*.repo
 rpm-ostree override remove -C \
     xpadneo-kmod-common \
     kmod-xpadneo \
@@ -16,4 +17,6 @@ rpm-ostree override remove -C \
     kvmfr \
     kmod-kvmfr
 rpm-ostree override replace -C --experimental /tmp/rpms/*.rpm
+rpm-ostree install scx-scheds
+rm -v /etc/yum.repos.d/ublue-os-staging*.repo
 exec ostree container commit
