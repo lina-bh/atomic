@@ -42,7 +42,6 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
     kcharselect \
     kfind \
     gum \
-    glow \
     incus \
     incus-agent \
     virt-v2v \
