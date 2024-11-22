@@ -63,7 +63,9 @@ RUN --mount=type=cache,target=/var/cache/rpm-ostree \
 RUN rm -v /etc/yum.repos.d/1password.repo /etc/yum.repos.d/google-chrome.repo && ostree container commit
 
 # eduroam
-RUN update-crypto-policies --set LEGACY && ostree container commit
+# TODO: make this more targeted to wireless security
+COPY legacy.conf /etc/pki/tls/openssl.d/
+RUN ostree container commit
 
 # https://github.com/DeterminateSystems/nix-installer/issues/1297
 # ENV NIX_INSTALLER_EXTRA_CONF="extra-trusted-users = @wheel\n"
