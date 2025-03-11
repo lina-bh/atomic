@@ -1,24 +1,26 @@
 #!/bin/bash
-
 set -ouex pipefail
 
-### Install packages
+coprs="ublue-os/packages bieszczaders/kernel-cachyos-addons"
+for copr in $coprs; do
+  dnf5 -y copr enable "$copr"
+done
+dnf5 -y config-manager addrepo --overwrite --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+# dnf5 -y install --nogpgcheck --repofrompath "terra,https://repos.fyralabs.com/terra\$releasever" terra-release{,-extras}
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
+dnf5 -y install \
+  ublue-os-luks \
+  ublue-os-udev-rules \
+  tailscale \
+  ;
 
-# this installs a package from fedora repos
-dnf5 install -y tmux 
+sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/tailscale.repo
+for copr in $coprs; do
+  dnf5 -y copr disable "$copr"
+done
 
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
+CSFG=/usr/lib/systemd/system-generators/coreos-sulogin-force-generator
+curl -sSLo ${CSFG} https://raw.githubusercontent.com/coreos/fedora-coreos-config/refs/heads/stable/overlay.d/05core/usr/lib/systemd/system-generators/coreos-sulogin-force-generator
+chmod +x ${CSFG}
 
-#### Example for enabling a System Unit File
-
-systemctl enable podman.socket
+systemctl enable tailscaled.service
