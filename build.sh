@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ouex pipefail
 
-coprs="ublue-os/packages bieszczaders/kernel-cachyos-addons"
+coprs="ublue-os/packages"
 for copr in $coprs; do
   dnf5 -y copr enable "$copr"
 done
@@ -20,6 +20,8 @@ dnf5 -y install \
   gamescope \
   mangohud \
   wl-clipboard \
+  neovim \
+  solaar-udev \
   ;
 dnf5 -y --setopt=install_weak_deps=False install \
   steam \
@@ -27,6 +29,8 @@ dnf5 -y --setopt=install_weak_deps=False install \
 dnf5 -y remove \
   firefox \
   firefox-langpacks \
+  krfb \
+  krfb-libs \
   ;
 
 dnf5 -y config-manager setopt "*rpmfusion*".enabled=0
