@@ -14,8 +14,6 @@ dnf5 -y install \
   ublue-os-media-automount-udev \
   ublue-os-udev-rules \
   tailscale \
-  rsms-inter-fonts \
-  scx-scheds \
   fish \
   gamescope \
   mangohud \
@@ -34,7 +32,8 @@ dnf5 -y remove \
   ;
 
 dnf5 -y config-manager setopt "*rpmfusion*".enabled=0
-sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/tailscale.repo
+dnf5 -y config-manager setopt "*tailscale*".enabled=0
+# sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/tailscale.repo
 for copr in $coprs; do
   dnf5 -y copr disable "$copr"
 done
