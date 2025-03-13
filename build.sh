@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ouex pipefail
 
-coprs="ublue-os/packages"
+coprs="ublue-os/packages ublue-os/staging"
 for copr in $coprs; do
   dnf5 -y copr enable "$copr"
 done
@@ -20,6 +20,7 @@ dnf5 -y install \
   wl-clipboard \
   neovim \
   solaar-udev \
+  android-udev-rules \
   ;
 dnf5 -y --setopt=install_weak_deps=False install \
   steam \
@@ -27,8 +28,10 @@ dnf5 -y --setopt=install_weak_deps=False install \
 dnf5 -y remove \
   firefox \
   firefox-langpacks \
+  filelight \
   krfb \
   krfb-libs \
+  kfind \
   ;
 
 dnf5 -y config-manager setopt "*rpmfusion*".enabled=0
