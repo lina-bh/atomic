@@ -22,6 +22,8 @@ dnf5 -y install \
   solaar-udev \
   android-udev-rules \
   duperemove \
+  libvirt \
+  libvirt-nss \
   ;
 dnf5 -y --setopt=install_weak_deps=False install \
   steam \
