@@ -21,6 +21,7 @@ dnf5 -y install \
   neovim \
   solaar-udev \
   android-udev-rules \
+  duperemove \
   ;
 dnf5 -y --setopt=install_weak_deps=False install \
   steam \
@@ -28,7 +29,6 @@ dnf5 -y --setopt=install_weak_deps=False install \
 dnf5 -y remove \
   firefox \
   firefox-langpacks \
-  filelight \
   krfb \
   krfb-libs \
   kfind \
