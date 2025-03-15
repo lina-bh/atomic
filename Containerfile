@@ -1,6 +1,53 @@
 FROM quay.io/fedora-ostree-desktops/kinoite:41
+RUN mkdir -p /var/lib/alternatives
 
-COPY build.sh /tmp/build.sh
-RUN mkdir -p /var/lib/alternatives && \
-    /tmp/build.sh && \
+RUN echo 'add_dracutmodules+=" fido2  "' > /usr/lib/dracut/dracut.conf.d/89-fido2.conf && ostree container commit
+
+ADD https://raw.githubusercontent.com/coreos/fedora-coreos-config/refs/heads/stable/overlay.d/05core/usr/lib/systemd/system-generators/coreos-sulogin-force-generator /usr/lib/systemd/system-generators/
+RUN chmod 0744 /usr/lib/systemd/system-generators/coreos-sulogin-force-generator && ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y --setopt=install_weak_deps=False install neovim && ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y config-manager addrepo --overwrite --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo && \
+    dnf5 -y install tailscale && \
+    dnf5 -y config-manager setopt "*tailscale*".enabled=0 && \
     ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y copr enable ublue-os/packages && \
+    dnf5 -y copr enable ublue-os/staging && \
+    dnf5 -y install \
+    android-udev-rules \
+    ublue-os-media-automount-udev \
+    ublue-os-udev-rules \
+    && \
+    dnf5 -y copr disable ublue-os/staging && \
+    dnf5 -y copr disable ublue-os/packages && \
+    ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    rpm --import https://repos.fyralabs.com/terra41/key.asc && \
+    dnf5 -y install --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release{,-extras} && \
+    dnf5 -y config-manager setopt terra-mesa.enabled=1 '*terra*'.repo_gpgcheck=0 && \
+    dnf5 -y --setopt=install_weak_deps=False install steam && \
+    dnf5 -y config-manager setopt "*terra*".enabled=0 && \
+    ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y install \
+    fish \
+    gamescope \
+    mangohud \
+    wl-clipboard \
+    solaar-udev \
+    duperemove \
+    libvirt \
+    libvirt-nss \
+    qemu-system-{x86,aarch64} \
+    qemu-user-binfmt \
+    && \
+    ostree container commit
+
+RUN dnf5 -y remove firefox firefox-langpacks krfb krfb-libs kfind kcharselect && ostree container commit
