@@ -5,6 +5,7 @@ RUN echo 'add_dracutmodules+=" fido2  "' > /usr/lib/dracut/dracut.conf.d/89-fido
 
 ADD https://raw.githubusercontent.com/coreos/fedora-coreos-config/refs/heads/stable/overlay.d/05core/usr/lib/systemd/system-generators/coreos-sulogin-force-generator /usr/lib/systemd/system-generators/
 RUN chmod 0744 /usr/lib/systemd/system-generators/coreos-sulogin-force-generator && ostree container commit
+RUN systemctl disable flatpak-add-fedora-repos.service && ostree container commit
 
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y --setopt=install_weak_deps=False install neovim && ostree container commit
@@ -13,18 +14,26 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y config-manager addrepo --overwrite --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo && \
     dnf5 -y install tailscale && \
     dnf5 -y config-manager setopt "*tailscale*".enabled=0 && \
+    systemctl enable tailscaled.service && \
     ostree container commit
 
-RUN --mount=type=cache,target=/var/cache/libdnf5 \
-    dnf5 -y copr enable ublue-os/packages && \
-    dnf5 -y copr enable ublue-os/staging && \
-    dnf5 -y install \
-    android-udev-rules \
-    ublue-os-media-automount-udev \
-    ublue-os-udev-rules \
-    && \
-    dnf5 -y copr disable ublue-os/staging && \
-    dnf5 -y copr disable ublue-os/packages && \
+# RUN --mount=type=cache,target=/var/cache/libdnf5 \
+#     dnf5 -y copr enable ublue-os/packages && \
+#     dnf5 -y copr enable ublue-os/staging && \
+#     dnf5 -y install \
+#     android-udev-rules \
+#     ublue-os-media-automount-udev \
+#     ublue-os-udev-rules \
+#     ublue-os-update-services \ 
+#     && \
+#     dnf5 -y copr disable ublue-os/staging && \
+#     dnf5 -y copr disable ublue-os/packages && \
+#     systemctl disable flatpak-system-update && \
+#     systemctl disable --global flatpak-user-update && \
+#     ostree container commit
+RUN printf '[Daemon]\nAutomaticUpdatePolicy=stage\nLockLayering=true\n' > /etc/rpm-ostreed.conf && \
+    systemctl enable rpm-ostreed-automatic.timer && \
+    dnf5 -y remove plasma-discover-rpm-ostree && \
     ostree container commit
 
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
@@ -47,7 +56,10 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     libvirt-nss \
     qemu-system-{x86,aarch64} \
     qemu-user-binfmt \
+    gcc \
+    make \
+    chromium \
     && \
     ostree container commit
 
-RUN dnf5 -y remove firefox firefox-langpacks krfb krfb-libs kfind kcharselect && ostree container commit
+RUN dnf5 -y remove krfb krfb-libs kfind kcharselect && ostree container commit
