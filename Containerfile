@@ -37,11 +37,19 @@ RUN printf '[Daemon]\nAutomaticUpdatePolicy=stage\nLockLayering=true\n' > /etc/r
     ostree container commit
 
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y config-manager addrepo --overwrite --from-repofile=https://negativo17.org/repos/fedora-multimedia.repo && \
+    dnf5 -y install ffmpeg libav{codec,device,filter,format,util} libpostproc libsw{resample,scale} && \
+    dnf5 -y versionlock add ffmpeg libav{codec,device,filter,format,util} libpostproc libsw{resample,scale} && \
+    dnf5 -y config-manager setopt '*fedora-multimedia*'.enabled=0 && \
+    ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
     rpm --import https://repos.fyralabs.com/terra41/key.asc && \
     dnf5 -y install --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release{,-extras} && \
     dnf5 -y config-manager setopt terra-mesa.enabled=1 '*terra*'.repo_gpgcheck=0 && \
     dnf5 -y --setopt=install_weak_deps=False install steam && \
     dnf5 -y config-manager setopt "*terra*".enabled=0 && \
+    dnf5 -y versionlock add mesa-filesystem mesa-{dri,va,vulkan}-drivers mesa-lib{GL,EGL,gbm} && \
     ostree container commit
 
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
@@ -59,7 +67,10 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     gcc \
     make \
     chromium \
+    dejavu-lgc-fonts-all \
     && \
     ostree container commit
 
 RUN dnf5 -y remove krfb krfb-libs kfind kcharselect && ostree container commit
+
+LABEL containers.bootc=1
