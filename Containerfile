@@ -68,6 +68,7 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     make \
     chromium \
     dejavu-lgc-fonts-all \
+    openssl-devel \
     && \
     ostree container commit
 
