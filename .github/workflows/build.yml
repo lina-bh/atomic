@@ -73,11 +73,10 @@ jobs:
           podman run \
             --rm \
             --interactive \
-            --tty \
             --mount=type=bind,src=$OUTDIR,target=/out,relabel=private \
             --mount=type=bind,src=$ROOTFSDIR,target=/rootfs,relabel=private \
             "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" \
-            sh -c "mkdir /var/tmp && \
+            sh -c "mkdir /var/tmp; \
             /usr/bin/rpm-ostree experimental compose build-chunked-oci --bootc --format-version=1 --rootfs=/rootfs --output /out/out.oci"
           podman rmi -f "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
           podman load -i "${OUTDIR}/out.oci" \
