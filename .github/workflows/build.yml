@@ -54,6 +54,37 @@ jobs:
           layers: true
           oci: false
 
+      - name: rpm-ostree rechunk
+        continue-on-error: true
+        env:
+          IMAGE_TAG: latest
+        run: |
+          set -xeuo pipefail
+          OUTDIR=$(mktemp -d -p /var/tmp)
+          ROOTFSDIR=$(mktemp -d -p /var/tmp)
+          cleanup() {
+              rm -rf $OUTDIR
+              rm -rf $ROOTFSDIR
+          }
+          trap cleanup EXIT
+
+          podman export $(podman create "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}") | tar -xf - -C $ROOTFSDIR
+
+          podman run \
+            --rm \
+            --interactive \
+            --tty \
+            --mount=type=bind,src=$OUTDIR,target=/out,relabel=private \
+            --mount=type=bind,src=$ROOTFSDIR,target=/rootfs,relabel=private \
+            "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" \
+            sh -c "mkdir /var/tmp && \
+            /usr/bin/rpm-ostree experimental compose build-chunked-oci --bootc --format-version=1 --rootfs=/rootfs --output /out/out.oci"
+          podman rmi -f "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+          podman load -i "${OUTDIR}/out.oci" \
+            | sed "s/Loaded image: //" \
+            | xargs -i podman tag '{}' "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+          podman image tag "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+
       - uses: redhat-actions/push-to-registry@v2
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         id: push
@@ -70,7 +101,8 @@ jobs:
       - uses: sigstore/cosign-installer@v3.8.1
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
 
-      - if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      - name: Cosign image
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         continue-on-error: true
         run: |
           IMAGE_FULL="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
