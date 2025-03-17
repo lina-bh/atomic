@@ -29,6 +29,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: ublue-os/remove-unwanted-software@v7
+        with:
+          remove-codeql: true
+
       - uses: docker/metadata-action@v5
         id: metadata
         with:
