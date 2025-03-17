@@ -60,6 +60,8 @@ jobs:
 
       - name: rpm-ostree rechunk
         continue-on-error: true
+        # doesn't fucking work does it
+        if: false
         env:
           IMAGE_TAG: latest
         run: |
@@ -100,6 +102,8 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_PASSWORD }}
+          extra-args: |
+            --compression-format=zstd:chunked
 
       - uses: sigstore/cosign-installer@v3.8.1
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
