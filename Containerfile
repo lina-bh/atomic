@@ -7,6 +7,12 @@ ADD https://raw.githubusercontent.com/coreos/fedora-coreos-config/refs/heads/sta
 RUN chmod 0744 /usr/lib/systemd/system-generators/coreos-sulogin-force-generator && ostree container commit
 RUN systemctl disable flatpak-add-fedora-repos.service && ostree container commit
 
+RUN systemctl enable --global podman.socket && ostree container commit
+
+RUN authselect enable-feature with-fingerprint && \
+    authselect enable-feature with-systemd-homed && \
+    ostree container commit
+
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y --setopt=install_weak_deps=False install neovim && ostree container commit
 
