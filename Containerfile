@@ -50,26 +50,24 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
 RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y --setopt=install_weak_deps=0 --setopt=terra.enabled=1 install steam && ostree container commit
 
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
-    dnf5 -y install \
-    fish \
-    gamescope \
-    mangohud \
-    wl-clipboard \
-    solaar-udev \
-    duperemove \
-    libvirt \
-    libvirt-nss \
-    qemu-system-{x86,aarch64} \
-    qemu-user-binfmt \
-    gcc \
-    make \
-    chromium \
-    dejavu-lgc-fonts-all \
-    openssl-devel \
-    python-libdnf5 \
-    ripgrep \
-    fd-find \
-    && ostree container commit
+    dnf5 -y copr enable wezfurlong/wezterm-nightly && \
+    dnf5 -y install wezterm && \
+    dnf5 -y copr disable wezfurlong/wezterm-nightly && \
+    ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install fish && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install gamescope && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install mangohud && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install wl-clipboard && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install solaar-udev && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install duperemove && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install gcc && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install dejavu-lgc-fonts-all && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install openssl-devel && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install python-libdnf5 && ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install libvirt libvirt-nss qemu-system-{x86,aarch64} qemu-user-binfmt && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install chromium && ostree container commit
 
 RUN dnf5 -y remove krfb krfb-libs kfind kcharselect plasma-discover-rpm-ostree && ostree container commit
 
