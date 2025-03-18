@@ -27,6 +27,7 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     systemctl enable tailscaled.service && \
     ostree container commit
 
+# ffmpeg
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y config-manager addrepo --overwrite --from-repofile=https://negativo17.org/repos/fedora-multimedia.repo && \
     dnf5 -y install ffmpeg libav{codec,device,filter,format,util} libpostproc libsw{resample,scale} && \
@@ -34,14 +35,19 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y config-manager setopt '*fedora-multimedia*'.enabled=0 && \
     ostree container commit
 
+# mesa all in one go
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     rpm --import https://repos.fyralabs.com/terra41/key.asc && \
     dnf5 -y install --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release{,-extras} && \
-    dnf5 -y config-manager setopt terra-mesa.enabled=1 '*terra*'.repo_gpgcheck=0 && \
-    dnf5 -y --setopt=install_weak_deps=False install steam && \
-    dnf5 -y config-manager setopt "*terra*".enabled=0 && \
+    dnf5 -y config-manager setopt terra-mesa.enabled=1 terra-mesa.priority=0 '*terra*'.repo_gpgcheck=0 && \
+    dnf5 -y --repo=terra-mesa swap mesa-filesystem mesa-filesystem && \
+    dnf5 -y install mesa-filesystem.i686 mesa-{dri,va,vulkan}-drivers.i686 mesa-lib{GL,EGL,gbm}.i686 && \
     dnf5 -y versionlock add mesa-filesystem mesa-{dri,va,vulkan}-drivers mesa-lib{GL,EGL,gbm} && \
+    dnf5 -y config-manager setopt '*terra*'.enabled=0 && \
     ostree container commit
+
+# then steam
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y --setopt=install_weak_deps=0 --setopt=terra.enabled=1 install steam && ostree container commit
 
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y install \
