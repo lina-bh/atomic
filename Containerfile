@@ -13,6 +13,10 @@ RUN authselect enable-feature with-fingerprint && \
     authselect enable-feature with-systemd-homed && \
     ostree container commit
 
+ADD ./rpm-ostreed.conf /etc/
+ADD ./bootc-fetch-apply-updates.service.d /usr/lib/systemd/system/
+RUN ostree container commit
+
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y --setopt=install_weak_deps=False install neovim && ostree container commit
 
