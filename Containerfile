@@ -56,8 +56,10 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     chromium \
     dejavu-lgc-fonts-all \
     openssl-devel \
-    && \
-    ostree container commit
+    python-libdnf5 \
+    ripgrep \
+    fd-find \
+    && ostree container commit
 
 RUN dnf5 -y remove krfb krfb-libs kfind kcharselect plasma-discover-rpm-ostree && ostree container commit
 
