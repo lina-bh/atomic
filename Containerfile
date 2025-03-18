@@ -17,25 +17,6 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     systemctl enable tailscaled.service && \
     ostree container commit
 
-# RUN --mount=type=cache,target=/var/cache/libdnf5 \
-#     dnf5 -y copr enable ublue-os/packages && \
-#     dnf5 -y copr enable ublue-os/staging && \
-#     dnf5 -y install \
-#     android-udev-rules \
-#     ublue-os-media-automount-udev \
-#     ublue-os-udev-rules \
-#     ublue-os-update-services \ 
-#     && \
-#     dnf5 -y copr disable ublue-os/staging && \
-#     dnf5 -y copr disable ublue-os/packages && \
-#     systemctl disable flatpak-system-update && \
-#     systemctl disable --global flatpak-user-update && \
-#     ostree container commit
-RUN printf '[Daemon]\nAutomaticUpdatePolicy=stage\nLockLayering=true\n' > /etc/rpm-ostreed.conf && \
-    systemctl enable rpm-ostreed-automatic.timer && \
-    dnf5 -y remove plasma-discover-rpm-ostree && \
-    ostree container commit
-
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y config-manager addrepo --overwrite --from-repofile=https://negativo17.org/repos/fedora-multimedia.repo && \
     dnf5 -y install ffmpeg libav{codec,device,filter,format,util} libpostproc libsw{resample,scale} && \
@@ -72,6 +53,6 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     && \
     ostree container commit
 
-RUN dnf5 -y remove krfb krfb-libs kfind kcharselect && ostree container commit
+RUN dnf5 -y remove krfb krfb-libs kfind kcharselect plasma-discover-rpm-ostree && ostree container commit
 
 LABEL containers.bootc=1
