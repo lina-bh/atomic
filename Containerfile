@@ -19,6 +19,18 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     systemctl enable tailscaled.service && \
     ostree container commit
 
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y copr enable bieszczaders/kernel-cachyos-addons && \
+    dnf5 -y install scx-scheds scx-manager scxctl cachyos-ksm-settings && \
+    dnf5 -y copr disable bieszczaders/kernel-cachyos-addons && \
+    ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y copr enable wezfurlong/wezterm-nightly && \
+    dnf5 -y install wezterm && \
+    dnf5 -y copr disable wezfurlong/wezterm-nightly && \
+    ostree container commit
+
 # ffmpeg
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y config-manager addrepo --overwrite --from-repofile=https://negativo17.org/repos/fedora-multimedia.repo && \
@@ -38,22 +50,8 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y config-manager setopt '*terra*'.enabled=0 && \
     ostree container commit
 
-# then steam
-RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y --setopt=install_weak_deps=0 --setopt=terra.enabled=1 install steam && ostree container commit
-
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
-    dnf5 -y copr enable wezfurlong/wezterm-nightly && \
-    dnf5 -y install wezterm && \
-    dnf5 -y copr disable wezfurlong/wezterm-nightly && \
-    ostree container commit
-
-RUN --mount=type=cache,target=/var/cache/libdnf5 \
-    dnf5 -y copr enable bieszczaders/kernel-cachyos-addons && \
-    dnf5 -y install scx-scheds scx-manager && \
-    dnf5 -y copr disable bieszczaders/kernel-cachyos-addons && \
-    ostree container commit
-
-RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y --setopt=install_weak_deps=False install neovim && \
     dnf5 -y install \
     fish \
     wl-clipboard \
@@ -68,14 +66,21 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     htop \
     gnome-disk-utility \
     && ostree container commit
+
+# then steam
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y --setopt=install_weak_deps=0 --setopt=terra.enabled=1 install steam && ostree container commit
+
 RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install gcc && ostree container commit
 RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install chromium && ostree container commit
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y install \
-    libvirt \
-    libvirt-nss \
     qemu-system-{x86,aarch64} \
     qemu-user-binfmt \
+    && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y --setopt=install_weak_deps=0 install \
+    libvirt \
+    libvirt-nss \
     && ostree container commit
 
 RUN dnf5 -y remove krfb krfb-libs kfind kcharselect plasma-discover-rpm-ostree && ostree container commit
