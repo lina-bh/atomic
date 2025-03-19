@@ -56,6 +56,12 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     ostree container commit
 
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
+    dnf5 -y copr enable bieszczaders/kernel-cachyos-addons && \
+    dnf5 -y install scx-scheds scx-manager && \
+    dnf5 -y copr disable bieszczaders/kernel-cachyos-addons && \
+    ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y install \
     fish \
     wl-clipboard \
