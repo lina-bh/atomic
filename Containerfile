@@ -1,24 +1,16 @@
 FROM quay.io/fedora-ostree-desktops/kinoite:41
-RUN mkdir -p /var/lib/alternatives
 
-RUN echo 'add_dracutmodules+=" fido2  "' > /usr/lib/dracut/dracut.conf.d/89-fido2.conf && ostree container commit
-
+COPY ./rpm-ostreed.conf /etc/
+COPY ./bootc-fetch-apply-updates.service.d /etc/systemd/system/
 ADD https://raw.githubusercontent.com/coreos/fedora-coreos-config/refs/heads/stable/overlay.d/05core/usr/lib/systemd/system-generators/coreos-sulogin-force-generator /usr/lib/systemd/system-generators/
-RUN chmod 0744 /usr/lib/systemd/system-generators/coreos-sulogin-force-generator && ostree container commit
-RUN systemctl disable flatpak-add-fedora-repos.service && ostree container commit
-
-RUN systemctl enable --global podman.socket && ostree container commit
-
-RUN authselect enable-feature with-fingerprint && \
+RUN mkdir -p /var/lib/alternatives && \
+    echo 'add_dracutmodules+=" fido2  "' > /usr/lib/dracut/dracut.conf.d/89-fido2.conf && \
+    chmod 0744 /usr/lib/systemd/system-generators/coreos-sulogin-force-generator && \
+    systemctl disable flatpak-add-fedora-repos.service && \
+    systemctl enable --global podman.socket && \
+    authselect enable-feature with-fingerprint && \
     authselect enable-feature with-systemd-homed && \
     ostree container commit
-
-ADD ./rpm-ostreed.conf /etc/
-ADD ./bootc-fetch-apply-updates.service.d /usr/lib/systemd/system/
-RUN ostree container commit
-
-RUN --mount=type=cache,target=/var/cache/libdnf5 \
-    dnf5 -y --setopt=install_weak_deps=False install neovim && ostree container commit
 
 RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dnf5 -y config-manager addrepo --overwrite --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo && \
