@@ -73,6 +73,7 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     dejavu-lgc-fonts-all \
     make \
     openssl-devel \
+    htop \
     && ostree container commit
 RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install gcc && ostree container commit
 RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install chromium && ostree container commit
