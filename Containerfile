@@ -74,6 +74,7 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     make \
     openssl-devel \
     htop \
+    gnome-disk-utility \
     && ostree container commit
 RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install gcc && ostree container commit
 RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install chromium && ostree container commit
