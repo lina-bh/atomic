@@ -1,12 +1,9 @@
-<<<<<<< HEAD
+set dotenv-load := true
+
 export repo_organization := env("GITHUB_REPOSITORY_OWNER", "lina-bh")
 export image_name := env("IMAGE_NAME", "atomic")
-=======
-export repo_organization := env("GITHUB_REPOSITORY_OWNER", "yourname")
-export image_name := env("IMAGE_NAME", "yourimage")
 export centos_version := env("CENTOS_VERSION", "stream10")
 export fedora_version := env("CENTOS_VERSION", "41")
->>>>>>> upstream/main
 export default_tag := env("DEFAULT_TAG", "latest")
 export bib_image := env("BIB_IMAGE", "quay.io/centos-bootc/bootc-image-builder:latest")
 
@@ -125,11 +122,40 @@ build $target_image=image_name $tag=default_tag $dx="0" $hwe="0" $gdx="0":
     fi
 
     podman build \
-        "${BUILD_ARGS[@]}" \
         --pull=newer \
-        --tag "${target_image}:${tag}" \
+        --tag "${target_image}:unchunked" \
+        --cache-from "ghcr.io/${repo_organization}/${target_image}" \
         .
 
+    tmp="$(mktemp -d)"
+    cleanup_tmp() {
+        rm -r "$tmp"
+        podman rm -fiv rechunk
+    }
+    trap cleanup_tmp EXIT
+    
+    podman run \
+        --rm \
+        --mount=type=image,src="${target_image}":unchunked,target=/var/tree,rw=true \
+        --mount=type=volume,target=/var/ostree \
+        --mount=type=bind,src="$tmp",target=/workspace \
+        --security-opt=label=disable \
+        --user 0:0 \
+        --env TREE=/var/tree \
+        --env INIT_REPO=1 \
+        --env REPO=/var/ostree/repo \
+        --env PREV_REF="ghcr.io/${repo_organization}/${target_image}:latest" \
+        --env OUT_NAME="${target_image}" \
+        --env OUT_REF="oci-archive:/workspace/image.tar" \
+        --env SKIP_COMPRESSION=1 \
+        --env LABELS="$GENERATED_LABELS" \
+        --name rechunk \
+        ghcr.io/hhd-dev/rechunk:latest \
+        sh -c '/sources/rechunk/1_prune.sh && /sources/rechunk/2_create.sh && touch $OUT_NAME.changelog.txt && /sources/rechunk/3_chunk.sh'
+    podman rmi -f "${target_image}:unchunked"
+    chunked_img="$(podman image import -c LABEL=containers.bootc=1 ${tmp}/image.tar")"
+    podman tag "$chunked_img" "${target_image}:latest"
+    
 # Command: _rootful_load_image
 # Description: This script checks if the current user is root or running under sudo. If not, it attempts to resolve the image tag using podman inspect.
 #              If the image is found, it loads it into rootful podman. If the image is not found, it pulls it from the repository.
