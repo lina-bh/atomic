@@ -153,7 +153,7 @@ build $target_image=image_name $tag=default_tag $dx="0" $hwe="0" $gdx="0":
         ghcr.io/hhd-dev/rechunk:latest \
         sh -c '/sources/rechunk/1_prune.sh && /sources/rechunk/2_create.sh && touch $OUT_NAME.changelog.txt && /sources/rechunk/3_chunk.sh'
     podman rmi -f "${target_image}:unchunked"
-    chunked_img="$(podman image import -c LABEL=containers.bootc=1 ${tmp}/image.tar")"
+    chunked_img="$(podman image import -c LABEL=containers.bootc=1 --message imported "${tmp}/image.tar")"
     podman tag "$chunked_img" "${target_image}:latest"
     
 # Command: _rootful_load_image
