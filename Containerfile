@@ -66,23 +66,12 @@ RUN --mount=type=cache,target=/var/cache/libdnf5 \
     openssl-devel \
     htop \
     gnome-disk-utility \
-    && ostree container commit
-
-# then steam
-RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y --setopt=install_weak_deps=0 --setopt=terra.enabled=1 install steam && ostree container commit
-
-RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install gcc && ostree container commit
-RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install chromium && ostree container commit
-RUN --mount=type=cache,target=/var/cache/libdnf5 \
-    dnf5 -y install \
-    qemu-system-{x86,aarch64} \
     qemu-user-binfmt \
     && ostree container commit
-RUN --mount=type=cache,target=/var/cache/libdnf5 \
-    dnf5 -y --setopt=install_weak_deps=0 install \
-    libvirt \
-    libvirt-nss \
-    && ostree container commit
+
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y --setopt=install_weak_deps=0 --setopt=terra.enabled=1 install steam && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install gcc && ostree container commit
+RUN --mount=type=cache,target=/var/cache/libdnf5 dnf5 -y install chromium && ostree container commit
 
 RUN dnf5 -y remove krfb krfb-libs kfind kcharselect plasma-discover-rpm-ostree && ostree container commit
 
