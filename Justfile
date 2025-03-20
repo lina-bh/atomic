@@ -106,59 +106,22 @@ sudoif command *args:
 # Build the image using the specified parameters
 build $target_image=image_name $tag=default_tag $dx="0" $hwe="0" $gdx="0":
     #!/usr/bin/env bash
-
-    # Get Version
-    ver="${tag}-${centos_version}.$(date +%Y%m%d)"
+    set -eo pipefail
 
     BUILD_ARGS=()
-    BUILD_ARGS+=("--build-arg" "MAJOR_VERSION=${centos_version}")
-    BUILD_ARGS+=("--build-arg" "IMAGE_NAME=${target_image}")
-    BUILD_ARGS+=("--build-arg" "IMAGE_VENDOR=${repo_organization}")
-    BUILD_ARGS+=("--build-arg" "ENABLE_DX=${dx}")
-    BUILD_ARGS+=("--build-arg" "ENABLE_HWE=${hwe}")
-    BUILD_ARGS+=("--build-arg" "ENABLE_GDX=${gdx}")
-    if [[ -z "$(git status -s)" ]]; then
-        BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=$(git rev-parse --short HEAD)")
-    fi
+    while IFS=$'\n' read -r label; do
+        BUILD_ARGS+=("--label" "$label")
+    done <<< $GENERATED_LABELS && unset label
 
     podman build \
+        "${BUILD_ARGS[@]}" \
         --pull=newer \
-        --tag "${target_image}:unchunked" \
+        --tag "${target_image}:${tag}" \
         --cache-from "ghcr.io/${repo_organization}/${target_image}" \
         .
-
-    tmp="$(mktemp -d)"
-    cleanup_tmp() {
-        rm -r "$tmp"
-        podman rm -fiv rechunk
-    }
-    trap cleanup_tmp EXIT
-    
-    podman run \
-        --rm \
-        --mount=type=image,src="${target_image}":unchunked,target=/var/tree,rw=true \
-        --mount=type=volume,target=/var/ostree \
-        --mount=type=bind,src="$tmp",target=/workspace \
-        --security-opt=label=disable \
-        --user 0:0 \
-        --env TREE=/var/tree \
-        --env INIT_REPO=1 \
-        --env REPO=/var/ostree/repo \
-        --env PREV_REF="ghcr.io/${repo_organization}/${target_image}:latest" \
-        --env OUT_NAME="${target_image}" \
-        --env OUT_REF="oci-archive:/workspace/image.tar" \
-        --env SKIP_COMPRESSION=1 \
-        --env LABELS="$GENERATED_LABELS" \
-        --env RESET_TIMESTAMP="$RESET_TIMESTAMP" \
-        --name rechunk \
-        ghcr.io/hhd-dev/rechunk:latest \
-        sh -c '/sources/rechunk/1_prune.sh && /sources/rechunk/2_create.sh && touch $OUT_NAME.changelog.txt && /sources/rechunk/3_chunk.sh'
-    podman rmi -f "${target_image}:unchunked"
-    chunked_img="$(podman image import -c LABEL=containers.bootc=1 --message imported "${tmp}/image.tar")"
-    podman tag "$chunked_img" "${target_image}:latest"
     test -n "$GENERATED_TAGS" && for tag in $GENERATED_TAGS; do
-        podman tag "$chunked_img" "${target_image}:${tag}"
-    done
+        podman tag "${target_image}:${tag}" "${target_image}:${tag}"
+    done || :
     
 # Command: _rootful_load_image
 # Description: This script checks if the current user is root or running under sudo. If not, it attempts to resolve the image tag using podman inspect.
