@@ -44,9 +44,6 @@ jobs:
       #   with:
       #     remove-codeql: true
 
-      - name: Setup just
-        uses: extractions/setup-just@v3
-
       - name: Get current date
         id: date
         run: |
@@ -101,11 +98,7 @@ jobs:
 
       - name: Build Image
         id: build_image
-        env:
-          GENERATED_LABELS: ${{ steps.metadata.outputs.labels }}
-          GENERATED_TAGS: ${{ steps.metadata.outputs.tags }}
-          RESET_TIMESTAMP: "1"
-        run: just build
+        run: bash ./build.sh
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
       # https://github.com/macbre/push-to-ghcr/issues/12

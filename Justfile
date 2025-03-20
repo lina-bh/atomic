@@ -105,23 +105,7 @@ sudoif command *args:
 
 # Build the image using the specified parameters
 build $target_image=image_name $tag=default_tag $dx="0" $hwe="0" $gdx="0":
-    #!/usr/bin/env bash
-    set -eo pipefail
-
-    BUILD_ARGS=()
-    while IFS=$'\n' read -r label; do
-        BUILD_ARGS+=("--label" "$label")
-    done <<< $GENERATED_LABELS && unset label
-
-    podman build \
-        "${BUILD_ARGS[@]}" \
-        --pull=newer \
-        --tag "${target_image}:${tag}" \
-        --cache-from "ghcr.io/${repo_organization}/${target_image}" \
-        .
-    test -n "$GENERATED_TAGS" && for tag in $GENERATED_TAGS; do
-        podman tag "${target_image}:${tag}" "${target_image}:${tag}"
-    done || :
+    bash ./build.sh
     
 # Command: _rootful_load_image
 # Description: This script checks if the current user is root or running under sudo. If not, it attempts to resolve the image tag using podman inspect.
