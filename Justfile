@@ -155,6 +155,9 @@ build $target_image=image_name $tag=default_tag $dx="0" $hwe="0" $gdx="0":
     podman rmi -f "${target_image}:unchunked"
     chunked_img="$(podman image import -c LABEL=containers.bootc=1 --message imported "${tmp}/image.tar")"
     podman tag "$chunked_img" "${target_image}:latest"
+    test -n "$GENERATED_TAGS" && for tag in $GENERATED_TAGS; do
+        podman tag "$chunked_img" "${target_image}:${tag}"
+    done
     
 # Command: _rootful_load_image
 # Description: This script checks if the current user is root or running under sudo. If not, it attempts to resolve the image tag using podman inspect.

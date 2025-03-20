@@ -105,13 +105,6 @@ jobs:
           GENERATED_LABELS: ${{ steps.metadata.outputs.labels }}
         run: just build
 
-      # This is necessary so that the podman socket can find the rechunked image on its storage
-      - name: Load in podman and tag
-        run: |
-          for tag in ${{ steps.metadata.outputs.tags }}; do
-            podman tag ${{env.IMAGE_NAME}}:latest ${{ env.IMAGE_NAME }}:$tag
-          done
-
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
       # https://github.com/macbre/push-to-ghcr/issues/12
       - name: Lowercase Registry
