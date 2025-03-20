@@ -1,7 +1,7 @@
 FROM quay.io/fedora-ostree-desktops/kinoite:41
 
 COPY ./rpm-ostreed.conf /etc/
-COPY ./bootc-fetch-apply-updates.service.d /etc/systemd/system/
+COPY ./bootc-fetch-apply-updates.service.d/ /etc/systemd/system/
 ADD https://raw.githubusercontent.com/coreos/fedora-coreos-config/refs/heads/stable/overlay.d/05core/usr/lib/systemd/system-generators/coreos-sulogin-force-generator /usr/lib/systemd/system-generators/
 ADD https://raw.githubusercontent.com/DeterminateSystems/nix-installer/refs/heads/main/src/action/linux/selinux/nix.pp /usr/share/selinux/packages/
 RUN mkdir -p /var/lib/alternatives && \
