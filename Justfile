@@ -149,6 +149,7 @@ build $target_image=image_name $tag=default_tag $dx="0" $hwe="0" $gdx="0":
         --env OUT_REF="oci-archive:/workspace/image.tar" \
         --env SKIP_COMPRESSION=1 \
         --env LABELS="$GENERATED_LABELS" \
+        --env RESET_TIMESTAMP="$RESET_TIMESTAMP" \
         --name rechunk \
         ghcr.io/hhd-dev/rechunk:latest \
         sh -c '/sources/rechunk/1_prune.sh && /sources/rechunk/2_create.sh && touch $OUT_NAME.changelog.txt && /sources/rechunk/3_chunk.sh'

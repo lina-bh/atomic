@@ -104,6 +104,7 @@ jobs:
         env:
           GENERATED_LABELS: ${{ steps.metadata.outputs.labels }}
           GENERATED_TAGS: ${{ steps.metadata.outputs.tags }}
+          RESET_TIMESTAMP: "1"
         run: just build
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
