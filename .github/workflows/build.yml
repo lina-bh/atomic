@@ -108,9 +108,8 @@ jobs:
       # This is necessary so that the podman socket can find the rechunked image on its storage
       - name: Load in podman and tag
         run: |
-          IMAGE=$(podman pull "${{ env.IMAGE_NAME }}:latest")
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            podman tag $IMAGE ${{ env.IMAGE_NAME }}:$tag
+            podman tag ${{env.IMAGE_NAME}}:latest ${{ env.IMAGE_NAME }}:$tag
           done
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
